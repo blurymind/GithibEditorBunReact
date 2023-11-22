@@ -66,11 +66,10 @@ function App() {
         setEditorFile={setEditorFile}
         onSaveFile={onSubmitChanges}
         onGetRepoData={onGetChanges}
-        disableSave={lastLoadedFile !== editorFile}
+        lastLoadedFile={lastLoadedFile}
         />
         {/* todo should be a dropdown list? */}
         {/* <Input title="Editing file" value={editorFile} onChange={setEditorFile}/> */}
-        {lastLoadedFile}
         <div>sha: {editorFileSha}</div>
         <AceEditor
           // mode="java"

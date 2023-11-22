@@ -19,50 +19,61 @@ const GithubFiles = ({
     setEditorFile,
     onSaveFile,
     onGetRepoData,
-    disableSave
+    lastLoadedFile
 }) => {
     const [repoFiles, setRepoFiles] = useState([]);
     console.log({gitToken, repoFiles})
 
-    useEffect(()=>{
-        // requestUserRepos(gitOwner, console.log)
-        //https://api.github.com/users/blurymind/repos/renjs-game-testbed/git/trees/main?recursive=1
+    const updateRepoFiles = () => {
         requestUserRepoFiles(gitOwner, gitRepo, gitRepoBranch, gitToken, res=>{
             console.log({res})
             setRepoFiles(res.tree)
         })
+    }
+    useEffect(()=>{
+        // requestUserRepos(gitOwner, console.log)
+        //https://api.github.com/users/blurymind/repos/renjs-game-testbed/git/trees/main?recursive=1
+        updateRepoFiles();
     }, [gitOwner, gitRepo, gitRepoBranch])
 
+    const onClickSaveFile = () => {
+        onSaveFile();
+        // todo replace w promise
+        setTimeout(()=>{
+            updateRepoFiles();
+        }, 900)
+    }
     //@ts-ignore
     const repoFilesPaths = repoFiles?.map(file=>file?.path)
     return (
         <div>
             <div>
-                Repository
+                Repository:
+                <Input 
+                    value={gitRepo}
+                    onChange={setGitRepo}
+                    title="name:"
+                />
+                <Input 
+                    value={gitRepoBranch}
+                    onChange={setGitRepoBranch}
+                    title="branch:"
+                />
+                Settings
+                <Input 
+                    value={gitOwner}
+                    onChange={setGitOwner}
+                    title="owner:"
+                />
                 <Input 
                     value={gitToken}
                     onChange={setGitToken}
                     title="access token:"
                 />
-                <Input 
-                    value={gitOwner}
-                    onChange={setGitOwner}
-                    title="repo owner:"
-                />
-                <Input 
-                    value={gitRepo}
-                    onChange={setGitRepo}
-                    title="repo name:"
-                />
-                <Input 
-                    value={gitRepoBranch}
-                    onChange={setGitRepoBranch}
-                    title="repo branch:"
-                />
-                
             </div>
+            File:
             <div style={{display:"flex", gap: 3}}>
-                
+
                 <Select
                     value={editorFile}
                     onChange={setEditorFile}
@@ -71,8 +82,9 @@ const GithubFiles = ({
                     id="repo-files"
                 />
                 <button onClick={onGetRepoData}>pull</button>
-                <button onClick={onSaveFile} disabled={disableSave}>save</button>
+                <button onClick={onClickSaveFile} disabled={lastLoadedFile !== editorFile && repoFilesPaths?.includes(editorFile)}>save</button>
             </div>
+            <div>editing {lastLoadedFile}</div>
         </div>
     )
 }

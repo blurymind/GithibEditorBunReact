@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import Input from "../components/Input.tsx";
 import { useStorage } from "../hooks.ts";
@@ -15,19 +15,30 @@ const GithubFiles = ({
     setGitRepo,
     gitRepoBranch,
     setGitRepoBranch,
+    editorFile, 
+    setEditorFile,
+    onSaveFile,
+    onGetRepoData,
+    disableSave
 }) => {
-
-    console.log({gitToken})
+    const [repoFiles, setRepoFiles] = useState([]);
+    console.log({gitToken, repoFiles})
 
     useEffect(()=>{
         // requestUserRepos(gitOwner, console.log)
         //https://api.github.com/users/blurymind/repos/renjs-game-testbed/git/trees/main?recursive=1
-        requestUserRepoFiles(gitOwner, gitRepo, gitRepoBranch, gitToken, console.log)
+        requestUserRepoFiles(gitOwner, gitRepo, gitRepoBranch, gitToken, res=>{
+            console.log({res})
+            setRepoFiles(res.tree)
+        })
     }, [gitOwner, gitRepo, gitRepoBranch])
 
+    //@ts-ignore
+    const repoFilesPaths = repoFiles?.map(file=>file?.path)
     return (
         <div>
             <div>
+                Repository
                 <Input 
                     value={gitToken}
                     onChange={setGitToken}
@@ -48,9 +59,19 @@ const GithubFiles = ({
                     onChange={setGitRepoBranch}
                     title="repo branch:"
                 />
+                
             </div>
-            <div>
-            File list
+            <div style={{display:"flex", gap: 3}}>
+                
+                <Select
+                    value={editorFile}
+                    onChange={setEditorFile}
+                    title="open file"
+                    values={repoFilesPaths}
+                    id="repo-files"
+                />
+                <button onClick={onGetRepoData}>pull</button>
+                <button onClick={onSaveFile} disabled={disableSave}>save</button>
             </div>
         </div>
     )
